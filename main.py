@@ -1,37 +1,17 @@
-from fastapi import FastAPI, Request, Form,File, UploadFile, HTTPException
-from pydantic import BaseModel
-from fastapi.middleware.cors import CORSMiddleware
+from flask import Flask, render_template, request
 import google.generativeai as genai
 import os
-from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
 import PyPDF2
 
-# Application ---------------------------------
-app = FastAPI()
-templates = Jinja2Templates(directory="templates")  # Load templates
+# Initialize Flask app
+app = Flask(__name__)
 
-
-# Set up the Google API Key--------------------
-os.environ["GOOGLE_API_KEY"] = "your api here"
+# Set up the Google API Key
+os.environ["GOOGLE_API_KEY"] = "you api key here"
 genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
+
 # Initialize the Gemini model
-# model = genai.GenerativeModel("models/gemini-1.5-pro")
 model = genai.GenerativeModel("gemini-1.5-flash")
-
-# Enable CORS for frontend integration---------
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# Define input model
-class URLInput(BaseModel):
-    url: str
-
 
 # functions
 def predict_fake_or_real_email_content(text):
@@ -84,58 +64,46 @@ def url_detection(url):
     return response.text if response else "Detection failed."
 
 
-# Endpoint to classify URL-------------------------------
-@app.get("/", response_class=HTMLResponse)
-def home(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+# Routes
+
+@app.route('/')
+def home():
+    return render_template("index.html")
 
 
-# API endpoint for scam detection (File Upload Only)
-@app.post("/scam/")
-async def detect_scam(file: UploadFile = File(...), request: Request = None):
+@app.route('/scam/', methods=['POST'])
+def detect_scam():
+    if 'file' not in request.files:
+        return render_template("index.html", message="No file uploaded.")
+
+    file = request.files['file']
     extracted_text = ""
 
-    # Process uploaded file
     if file.filename.endswith('.pdf'):
-        pdf_reader = PyPDF2.PdfReader(file.file)
+        pdf_reader = PyPDF2.PdfReader(file)
         extracted_text = " ".join([page.extract_text() for page in pdf_reader.pages if page.extract_text()])
     elif file.filename.endswith('.txt'):
-        extracted_text = (await file.read()).decode("utf-8")
+        extracted_text = file.read().decode("utf-8")
     else:
-        return templates.TemplateResponse("index.html", {"request": request, "message": "Invalid file type. Please upload a PDF or TXT file."})
+        return render_template("index.html", message="Invalid file type. Please upload a PDF or TXT file.")
 
-    # Ensure there is text to process
     if not extracted_text.strip():
-        return templates.TemplateResponse("index.html", {"request": request, "message": "File is empty or text could not be extracted."})
+        return render_template("index.html", message="File is empty or text could not be extracted.")
 
-    # Get prediction
     message = predict_fake_or_real_email_content(extracted_text)
-    return templates.TemplateResponse("index.html", {"request": request, "message": message})
+    return render_template("index.html", message=message)
 
 
+@app.route('/predict', methods=['POST'])
+def predict_url():
+    url = request.form.get('url', '').strip()
 
-@app.post("/predict", response_class=HTMLResponse)
-async def predict_url(request: Request, url: str = Form(...)):
-    try:
-        url = url.strip()
+    if not url.startswith(("http://", "https://")):
+        return render_template("index.html", message="Invalid URL format.", input_url=url)
 
-        if not url.startswith(("http://", "https://")):
-            return templates.TemplateResponse("index.html", {
-                "request": request,
-                "message": "Invalid URL format.",
-                "input_url": url
-            })
+    classification = url_detection(url)
+    return render_template("index.html", input_url=url, predicted_class=classification)
 
-        classification = url_detection(url)
 
-        return templates.TemplateResponse("index.html", {
-            "request": request,
-            "input_url": url,
-            "predicted_class": classification
-        })
-
-    except Exception as e:
-        return templates.TemplateResponse("index.html", {
-            "request": request,
-            "message": f"Error: {str(e)}"
-        })
+if __name__ == '__main__':
+    app.run(debug=True)
