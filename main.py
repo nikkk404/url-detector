@@ -19,7 +19,7 @@ def url_detection(url):
     prompt = f"""
     You are an advanced AI model specializing in URL security classification. Analyze the given URL and classify it as one of the following categories:
 
-    1. Benign**: Safe, trusted, and non-malicious websites such as google.com, wikipedia.org, amazon.com.
+    1. Safe**: Safe, trusted, and non-malicious websites such as google.com, wikipedia.org, amazon.com.
     2. Phishing**: Fraudulent websites designed to steal personal information. Indicators include misspelled domains (e.g., paypa1.com instead of paypal.com), unusual subdomains, and misleading content.
     3. Malware**: URLs that distribute viruses, ransomware, or malicious software. Often includes automatic downloads or redirects to infected pages.
     4. Defacement**: Hacked or defaced websites that display unauthorized content, usually altered by attackers.

@@ -19,36 +19,14 @@
             height: 100vh;
         }
 
-        /* Navbar */
-        .navbar {
-            width: 100%;
-            background: #161b22;
-            padding: 25px 0;
-            text-align: center;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            position: fixed;
-            top: 0;
-            left: 0;
-        }
-
-        .navbar h1 {
-            margin: 0;
-            font-size: 32px;
-            font-weight: bold;
-            color: #58a6ff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
         .container {
-            margin-top: 120px;
             background: #1c2128;
             padding: 40px;
             border-radius: 12px;
             width: 70%;
             max-width: 800px;
             text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
 
         input {
@@ -60,6 +38,12 @@
             background-color: #22272e;
             color: white;
             margin-bottom: 15px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            border-color: #99f2c8;
+            outline: none;
         }
 
         button {
@@ -70,7 +54,7 @@
             border-radius: 8px;
             cursor: pointer;
             width: 100%;
-            transition: 0.3s;
+            transition: background-color 0.3s, transform 0.3s;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -110,6 +94,8 @@
             padding: 15px;
             border-radius: 5px;
             font-size: 18px;
+            background-color: #161b22;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
 
         .benign { color: #34D399; }
@@ -129,8 +115,6 @@
     </script>
 </head>
 <body>
-
-    
 
     <div class="container">
         <h2><i class="fas fa-link"></i> URL Threat Detection</h2>
