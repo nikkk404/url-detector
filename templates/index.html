@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>URL Threat Detector</title>
+    <title>ThreatGuard</title>
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     <style>
         body {
@@ -26,10 +26,9 @@
             width: 70%;
             max-width: 800px;
             text-align: center;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
 
-        input {
+        input, textarea {
             width: 95%;
             padding: 14px;
             font-size: 18px;
@@ -38,12 +37,6 @@
             background-color: #22272e;
             color: white;
             margin-bottom: 15px;
-            transition: border-color 0.3s;
-        }
-
-        input:focus {
-            border-color: #99f2c8;
-            outline: none;
         }
 
         button {
@@ -54,7 +47,7 @@
             border-radius: 8px;
             cursor: pointer;
             width: 100%;
-            transition: background-color 0.3s, transform 0.3s;
+            transition: 0.3s;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -94,8 +87,6 @@
             padding: 15px;
             border-radius: 5px;
             font-size: 18px;
-            background-color: #161b22;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
 
         .benign { color: #34D399; }
@@ -103,6 +94,8 @@
         .malware { color: #EF4444; }
         .phishing { color: #8B5CF6; }
         .unknown { color: #ffffff; }
+        .true { color: #34D399; }
+        .fake { color: #EF4444; }
     </style>
 
     <script>
@@ -128,6 +121,21 @@
         {% if predicted_class %}
             <div class="result-box {{ predicted_class.lower() }}">
                 <p><strong>URL:</strong> {{ input_url }}</p>
+                <p><strong>Predicted Class:</strong> {{ predicted_class }}</p>
+            </div>
+        {% endif %}
+
+        <h2><i class="fas fa-newspaper"></i> Fake News Detection</h2>
+        <form method="post" action="/detect_fake_news" onsubmit="showSpinner('newsForm', 'newsSpinner')">
+            <label for="text">Enter Text:</label>
+            <textarea name="text" rows="4" required></textarea>
+            <button type="submit"><i class="fas fa-search"></i> Analyze</button>
+            <div id="newsSpinner" class="spinner"></div>
+        </form>
+
+        {% if predicted_class %}
+            <div class="result-box {{ predicted_class.lower() }}">
+                <p><strong>Text:</strong> {{ input_text }}</p>
                 <p><strong>Predicted Class:</strong> {{ predicted_class }}</p>
             </div>
         {% endif %}
